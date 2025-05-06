@@ -3,6 +3,13 @@ import shutil
 import requests
 import subprocess
 
+def check_dependencies():
+    for tool in ["wget", "tar"]:
+        if not shutil.which(tool):
+            print(f"Error: {tool} is not installed or not in PATH.")
+            return False
+    return True
+
 def copy_wget():
     source_file = "wget.exe"
     destination_file = r"C:\Windows\System32"
@@ -18,13 +25,13 @@ def install_vulkan():
     print("1. Vulkan 32-bit")
     print("2. Vulkan 64-bit")
     print("3. Uninstall Vulkan")
-    vulkan_choice = input("Enter your choice: ")
+    vulkan_choice = get_valid_choice("Enter your choice: ", ["1", "2", "3"])
     
     if vulkan_choice == "1":
         print("1. DirectX 9")
         print("2. DirectX 10")
         print("3. DirectX 11")
-        directx_choice = input("Enter your choice: ")
+        directx_choice = get_valid_choice("Enter your choice: ", ["1", "2", "3"])
         
         if directx_choice == "1":
             install_directx9_32()
@@ -32,13 +39,11 @@ def install_vulkan():
             install_directx10_32()
         elif directx_choice == "3":
             install_directx11_32()
-        else:
-            print("Invalid choice. Please select a valid option.")
     elif vulkan_choice == "2":
         print("1. DirectX 9")
         print("2. DirectX 10")
         print("3. DirectX 11")
-        directx_choice = input("Enter your choice: ")
+        directx_choice = get_valid_choice("Enter your choice: ", ["1", "2", "3"])
         
         if directx_choice == "1":
             install_directx9_64()
@@ -46,9 +51,6 @@ def install_vulkan():
             install_directx10_64()
         elif directx_choice == "3":
             install_directx11_64()
-        else:
-            print("Invalid choice. Please select a valid option.")    
-        pass
     elif vulkan_choice == "3":
         try:
             target_directory = input("Enter the Game.exe directory path: ")
@@ -77,158 +79,163 @@ def install_vulkan():
             print(f"An error occurred while uninstalling Vulkan: {e}")
             
 
+def download_files(target_directory, files):
+    if not os.path.exists(target_directory):
+        print("Target directory does not exist. Creating...")
+        os.makedirs(target_directory)
+
+    for file_name, url in files.items():
+        print(f"Downloading {file_name}")
+        response = requests.get(url)
+        with open(os.path.join(target_directory, file_name), 'wb') as file:
+            file.write(response.content)
+
+def copy_dxvk_files_dx932(target_directory, architecture):
+    """
+    Copy only d3d9.dll and dxgi.dll files for DirectX 9
+    """
+    source_dir = f"dxvk-2.6.1/x{architecture}"
+    required_files = ['d3d9.dll', 'dxgi.dll']
+    try:
+        for file in required_files:
+            source_file = os.path.join(source_dir, file)
+            dest_file = os.path.join(target_directory, file)
+            if os.path.exists(source_file):
+                shutil.copy2(source_file, dest_file)
+                print(f"Copied {file} to {target_directory}")
+            else:
+                print(f"Warning: {file} not found in source directory")
+    except Exception as e:
+        print(f"Error copying DXVK files: {e}")
+def copy_dxvk_files_dx1032(target_directory, architecture):
+    """
+    Copy only d3d10core.dll and dxgi.dll files for DirectX 10
+    """
+    source_dir = f"dxvk-2.6.1/x{architecture}"
+    required_files = ['d3d10core.dll', 'dxgi.dll']
+    try:
+        for file in required_files:
+            source_file = os.path.join(source_dir, file)
+            dest_file = os.path.join(target_directory, file)
+            if os.path.exists(source_file):
+                shutil.copy2(source_file, dest_file)
+                print(f"Copied {file} to {target_directory}")
+            else:
+                print(f"Warning: {file} not found in source directory")
+    except Exception as e:
+        print(f"Error copying DXVK files: {e}")
+
+def copy_dxvk_files_dx1132(target_directory, architecture):
+    """
+    Copy only d3d11.dll and dxgi.dll files for DirectX 11
+    """
+    source_dir = f"dxvk-2.6.1/x{architecture}"
+    required_files = ['d3d11.dll', 'dxgi.dll']
+    try:
+        for file in required_files:
+            source_file = os.path.join(source_dir, file)
+            dest_file = os.path.join(target_directory, file)
+            if os.path.exists(source_file):
+                shutil.copy2(source_file, dest_file)
+                print(f"Copied {file} to {target_directory}")
+            else:
+                print(f"Warning: {file} not found in source directory")
+    except Exception as e:
+        print(f"Error copying DXVK files: {e}")
+
+def copy_dxvk_files_dx964(target_directory, architecture):
+    """
+    Copy only d3d9.dll and dxgi.dll files for DirectX 9
+    """
+    source_dir = f"dxvk-2.6.1/x{architecture}"
+    required_files = ['d3d9.dll', 'dxgi.dll']
+    try:
+        for file in required_files:
+            source_file = os.path.join(source_dir, file)
+            dest_file = os.path.join(target_directory, file)
+            if os.path.exists(source_file):
+                shutil.copy2(source_file, dest_file)
+                print(f"Copied {file} to {target_directory}")
+            else:
+                print(f"Warning: {file} not found in source directory")
+    except Exception as e:
+        print(f"Error copying DXVK files: {e}")
+
+def copy_dxvk_files_dx1064(target_directory, architecture):
+    """
+    Copy only d3d10core.dll and dxgi.dll files for DirectX 10
+    """
+    source_dir = f"dxvk-2.6.1/x{architecture}"
+    required_files = ['d3d10core.dll', 'dxgi.dll']
+    try:
+        for file in required_files:
+            source_file = os.path.join(source_dir, file)
+            dest_file = os.path.join(target_directory, file)
+            if os.path.exists(source_file):
+                shutil.copy2(source_file, dest_file)
+                print(f"Copied {file} to {target_directory}")
+            else:
+                print(f"Warning: {file} not found in source directory")
+    except Exception as e:
+        print(f"Error copying DXVK files: {e}")
+
+def copy_dxvk_files_dx1164(target_directory, architecture):
+    """
+    Copy only d3d11.dll and dxgi.dll files for DirectX 11
+    """
+    source_dir = f"dxvk-2.6.1/x{architecture}"
+    required_files = ['d3d11.dll', 'dxgi.dll']
+    try:
+        for file in required_files:
+            source_file = os.path.join(source_dir, file)
+            dest_file = os.path.join(target_directory, file)
+            if os.path.exists(source_file):
+                shutil.copy2(source_file, dest_file)
+                print(f"Copied {file} to {target_directory}")
+            else:
+                print(f"Warning: {file} not found in source directory")
+    except Exception as e:
+        print(f"Error copying DXVK files: {e}")
+
 
 def install_directx9_32():
-    # Rest of your code for installing DirectX 9
-    downloaddxgi = "https://github.com/Naufal453/Gameops/blob/main/dxvk-2.2.tar/dxvk-2.2/x32/dxgi.dll"
-    downloadd3d9 = "https://github.com/Naufal453/Gameops/blob/main/dxvk-2.2.tar/dxvk-2.2/x32/d3d9.dll"
-    
     target_directory = input("Enter the Game.exe directory path: ")
-    
-    if not os.path.exists(target_directory):
-        print("Target directory does not exist. Creating...")
-        os.makedirs(target_directory)
-    
-    print("Downloading dxgi.dll")
-    response_dxgi = requests.get(downloaddxgi)
-    with open(os.path.join(target_directory, "dxgi.dll"), 'wb') as file:
-        file.write(response_dxgi.content)
-    
-    print("Downloading d3d9.dll")
-    response_d3d9 = requests.get(downloadd3d9)
-    with open(os.path.join(target_directory, "d3d9.dll"), 'wb') as file:
-        file.write(response_d3d9.content)
-    
-    print("The requirements have been installed")
-    pass
+    copy_dxvk_files_dx932(target_directory, "32")
+    print("DirectX 9 32-bit requirements have been installed")
 
 def install_directx10_32():
-    # Rest of your code for installing DirectX 10
-    downloaddxgi = "https://github.com/Naufal453/Gameops/blob/main/dxvk-2.2.tar/dxvk-2.2/x32/dxgi.dll"
-    downloadd3d10 = "https://github.com/Naufal453/Gameops/blob/main/dxvk-2.2.tar/dxvk-2.2/x32/d3d10core.dll"
-    
     target_directory = input("Enter the Game.exe directory path: ")
-    
-    if not os.path.exists(target_directory):
-        print("Target directory does not exist. Creating...")
-        os.makedirs(target_directory)
-    
-    print("Downloading dxgi.dll")
-    response_dxgi = requests.get(downloaddxgi)
-    with open(os.path.join(target_directory, "dxgi.dll"), 'wb') as file:
-        file.write(response_dxgi.content)
-    
-    print("Downloading d3d10core.dll")
-    response_d3d10core = requests.get(downloadd3d10)
-    with open(os.path.join(target_directory, "d3d10core.dll"), 'wb') as file:
-        file.write(response_d3d10core.content)
-    
-    print("The requirements have been installed")
-    pass
+    copy_dxvk_files_dx1032(target_directory, "32")
+    print("DirectX 10 32-bit requirements have been installed")
 
 def install_directx11_32():
-    # Rest of your code for installing DirectX 11
-    downloaddxgi = "https://github.com/Naufal453/Gameops/blob/main/dxvk-2.2.tar/dxvk-2.2/x32/dxgi.dll"
-    downloadd3d11 = "https://github.com/Naufal453/Gameops/blob/main/dxvk-2.2.tar/dxvk-2.2/x32/d3d11.dll"
-    
     target_directory = input("Enter the Game.exe directory path: ")
-    
-    if not os.path.exists(target_directory):
-        print("Target directory does not exist. Creating...")
-        os.makedirs(target_directory)
-    
-    print("Downloading dxgi.dll")
-    response_dxgi = requests.get(downloaddxgi)
-    with open(os.path.join(target_directory, "dxgi.dll"), 'wb') as file:
-        file.write(response_dxgi.content)
-    
-    print("Downloading d3d11.dll")
-    response_d3d11 = requests.get(downloadd3d11)
-    with open(os.path.join(target_directory, "d3d11.dll"), 'wb') as file:
-        file.write(response_d3d11.content)
-    
-    print("The requirements have been installed")
-    pass
+    copy_dxvk_files_dx1132(target_directory, "32")
+    print("DirectX 11 32-bit requirements have been installed")
 
 def install_directx9_64():
-    downloaddxgi = "https://github.com/Naufal453/Gameops/blob/main/dxvk-2.2.tar/dxvk-2.2/x64/dxgi.dll"
-    downloadd3d9 = "https://github.com/Naufal453/Gameops/blob/main/dxvk-2.2.tar/dxvk-2.2/x64/d3d9.dll"
-    
     target_directory = input("Enter the Game.exe directory path: ")
-    
-    if not os.path.exists(target_directory):
-        print("Target directory does not exist. Creating...")
-        os.makedirs(target_directory)
-    
-    print("Downloading dxgi.dll")
-    response_dxgi = requests.get(downloaddxgi)
-    with open(os.path.join(target_directory, "dxgi.dll"), 'wb') as file:
-        file.write(response_dxgi.content)
-    
-    print("Downloading d3d9.dll")
-    response_d3d9 = requests.get(downloadd3d9)
-    with open(os.path.join(target_directory, "d3d9.dll"), 'wb') as file:
-        file.write(response_d3d9.content)
-    
-    print("The requirements have been installed")
-    pass
+    copy_dxvk_files_dx964(target_directory, "64")
+    print("DirectX 9 64-bit requirements have been installed")
 
 def install_directx10_64():
-    downloaddxgi = "https://github.com/Naufal453/Gameops/blob/main/dxvk-2.2.tar/dxvk-2.2/x64/dxgi.dll"
-    downloadd3d10 = "https://github.com/Naufal453/Gameops/blob/main/dxvk-2.2.tar/dxvk-2.2/x64/d3d10core.dll"
-    
     target_directory = input("Enter the Game.exe directory path: ")
-    
-    if not os.path.exists(target_directory):
-        print("Target directory does not exist. Creating...")
-        os.makedirs(target_directory)
-    
-    print("Downloading dxgi.dll")
-    response_dxgi = requests.get(downloaddxgi)
-    with open(os.path.join(target_directory, "dxgi.dll"), 'wb') as file:
-        file.write(response_dxgi.content)
-    
-    print("Downloading d3d10core.dll")
-    response_d3d10core = requests.get(downloadd3d10)
-    with open(os.path.join(target_directory, "d3d10core.dll"), 'wb') as file:
-        file.write(response_d3d10core.content)
-    
-    print("The requirements have been installed")
-    pass
+    copy_dxvk_files_dx1064(target_directory, "64")
+    print("DirectX 10 64-bit requirements have been installed")
 
 def install_directx11_64():
-    downloaddxgi = "https://github.com/Naufal453/Gameops/blob/main/dxvk-2.2.tar/dxvk-2.2/x64/dxgi.dll"
-    downloadd3d11 = "https://github.com/Naufal453/Gameops/blob/main/dxvk-2.2.tar/dxvk-2.2/x64/d3d11.dll"
-    
     target_directory = input("Enter the Game.exe directory path: ")
-    
-    if not os.path.exists(target_directory):
-        print("Target directory does not exist. Creating...")
-        os.makedirs(target_directory)
-    
-    print("Downloading dxgi.dll")
-    response_dxgi = requests.get(downloaddxgi)
-    with open(os.path.join(target_directory, "dxgi.dll"), 'wb') as file:
-        file.write(response_dxgi.content)
-    
-    print("Downloading d3d11.dll")
-    response_d3d11 = requests.get(downloadd3d11)
-    with open(os.path.join(target_directory, "d3d11.dll"), 'wb') as file:
-        file.write(response_d3d11.content)
-    
-    print("The requirements have been installed")
-    pass
+    copy_dxvk_files_dx1164(target_directory, "64")
+    print("DirectX 11 64-bit requirements have been installed")
 
 def perform_optimization():
     print("1. Amd Ryzen Tdp Change (RyzenAdj)")
     print("2. Other Optimizations (Coming soon)")
-    choice = input("Enter your choice: ")
+    choice = get_valid_choice("Enter your choice: ", ["1", "2"])
     if choice =="1":
         ryzenadjusment()
     elif choice =="2":
         print("coming soon")
-    else:
-        print("Invalid choice")
 
     pass
 def ryzenadjusment():
@@ -236,7 +243,7 @@ def ryzenadjusment():
     print("2. 25 watt")
     print("3. 30 watt")
     print("4. 45 watt")
-    choice = input("Enter your choice: ")
+    choice = get_valid_choice("Enter your choice: ", ["1", "2", "3", "4"])
     if choice =="1":
         script_dir = os.path.dirname(os.path.abspath(__file__))
         subdirectory_name = "ryzenadj-win64"
@@ -309,34 +316,75 @@ def ryzenadjusment():
             print(result.stderr)             
         except subprocess.CalledProcessError as e:
             print("Error:", e)
-    else:
-        print("Invalid choice. Please select a valid option.")
         
     pass               
         
-    
-def main():
+def get_valid_choice(prompt, choices):
     while True:
-        os.system("cls" if os.name == "nt" else "clear")
+        choice = input(prompt)
+        if choice in choices:
+            return choice
+        print("Invalid choice. Please try again.")
+
+def download_dxvk():
+    url = "https://github.com/doitsujin/dxvk/releases/download/v2.6.1/dxvk-2.6.1.tar.gz"
+    output_file = "dxvk-2.6.1.tar.gz"
+
+    try:
+        # Execute wget command
+        cmd_command = f"wget {url} -O {output_file}"
+        result = subprocess.run(cmd_command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+
+        if result.returncode != 0:
+            print("Error output:")
+            print(result.stderr)
+            print("Failed to download the file. Please ensure wget is installed and in PATH.")
+            return False
+
+        # Extract the tar.gz file
+        print("Extracting DXVK files...")
+        extract_cmd = f"tar -xzf {output_file}"
+        extract_result = subprocess.run(extract_cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+
+        if extract_result.returncode != 0:
+            print("Error extracting files:")
+            print(extract_result.stderr)
+            return False
+
+        print("DXVK files extracted successfully")
+        return True
+    except Exception as e:
+        print(f"An error occurred: {e}")
+        return False
+
+def main():
+    # Clear the console
+    os.system("cls" if os.name == "nt" else "clear")
+    print("Starting GameOps...")
+
+    # Download the DXVK file
+    download_dxvk()
+
+    while True:
         print("GameOps By Test_bench")
         print("Main Menu")
         print("1. Install/Uninstall Vulkan")
         print("2. Optimization")
         print("3. Exit")
-        
+
         choice = input("Enter your choice: ")
-        
+
         if choice == "1":
-            copy_wget()  # Call the function to copy wget.exe
             install_vulkan()
         elif choice == "2":
             perform_optimization()
         elif choice == "3":
+            print("Exiting GameOps. Goodbye!")
             break
         else:
             print("Invalid choice. Please select a valid option.")
-        
+
         input("Press Enter to continue...")
-    
+
 if __name__ == "__main__":
     main()
